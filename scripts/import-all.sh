@@ -24,6 +24,15 @@ for i in $(seq 1 20); do
   sleep 30
 done
 
+echo "==> Importing tool get_permit_status..."
+orchestrate tools import -k python --file tools/get_permit_status.py --package-root tools/
+
+echo "==> Importing tool get_request_status..."
+orchestrate tools import -k python --file tools/get_request_status.py --package-root tools/
+
+echo "==> Importing tool get_collection_days..."
+orchestrate tools import -k python --file tools/get_collection_days.py --package-root tools/
+
 echo "==> Importing civic_info_agent..."
 orchestrate agents import -f agents/civic_info_agent.yaml
 
