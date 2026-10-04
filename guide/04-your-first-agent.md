@@ -145,7 +145,7 @@ Before you leave the design, notice one thing about the facts: two departments h
 
 Before Bob builds, one thing about watsonx Orchestrate decides where your agent will appear and who can talk to it.
 
-Every agent on an instance is in one of two states. Draft is the builder's state: a draft agent can be changed as often as you like, tested, corrected and imported again, and only the builders who work on the instance can see it, from the Manage agents page. Live is the users' state: a live agent is what residents find in the chat on the instance's landing page, and later on the city's website.
+Every agent on an instance is in one of two states. Draft is the builder's state: a draft agent can be changed as often as you like, tested, corrected and imported again, and only the builders who work on the instance can see it, from the Manage agents page, where a preview panel lets you chat with the draft. Live is the users' state: a live agent is what residents find in the chat on the instance's landing page, and later on the city's website.
 
 The two states are two separate copies of the agent. When Bob imports the agent, or imports it again after a correction, it changes the draft copy. The live copy does not change until you deploy: one operation that takes the current draft and makes it the live version. Until then, residents keep talking to the previous live version, which is what you want: you test and repair in draft, and nobody meets an agent under repair. If a deployment turns out to be wrong, undeploying returns the agent to its previous live version.
 
@@ -268,7 +268,7 @@ Deploy civic_info_agent from draft to live.
 
 Bob runs the deployment and reports that the agent was deployed. Open your watsonx Orchestrate instance in the browser: the agent is now in the chat on the landing page, with its welcome message and its two starter prompts, for anyone who has access to the instance. On the Developer Edition, skip this step; deployment is not available there.
 
-From now on, the draft and the live agent are two copies. The next time you ask Bob to change the agent, the change goes to the draft, and the live agent keeps answering as before until you deploy again.
+From now on, the draft and the live agent are two copies, and it pays to know which one you are talking to. The next time you ask Bob to change the agent, the change goes to the draft, and the live agent keeps answering as before until you deploy again. The same goes for questions: when you ask Bob to send a question to the agent, it reaches the draft, because the operation that Bob uses to chat with an agent, `chat_with_agent` on the Orchestrate server, is built for the draft and has no option to point at the live copy. While you build, that is what you want: you test what you change, and residents never see it. To hear the live agent, the one residents hear, use the chat in watsonx Orchestrate.
 
 ## 4.10 Summary
 

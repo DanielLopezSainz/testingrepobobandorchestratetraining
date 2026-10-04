@@ -1,4 +1,4 @@
-# Chapter 5. Give the agent the city's regulations
+# Chapter 5. Adding a Knowledge Base (RAG)
 
 Level: beginner. Time: about 60 minutes. Prerequisites: chapter 4 completed, or its agent imported from the walkthrough folder as the chapter's Overview describes.
 
@@ -43,6 +43,7 @@ A knowledge base is not the right component for information about one person or 
 - Documents are files: text, PDF, Word, PowerPoint, Excel, CSV or HTML. A knowledge base holds up to 100 of them, with size limits per type, for example 25 MB for a PDF and 5 MB for a text file. Plain text is the simplest format and the one that this chapter uses.
 - Indexing takes time. After the import, the knowledge base is not ready at once; the platform processes the documents in the background, and an agent can use the knowledge base only when its status is ready. Bob checks the status for you.
 - A knowledge base belongs to the instance, not to one state of an agent. It is shared by the draft and the live copies of every agent that uses it, so a change to the documents reaches residents at once, without a deployment.
+- Updating a knowledge base is importing it again under the same name. When a regulation changes, you tell Bob what changed; Bob edits the text file and imports the knowledge base again, the platform re-indexes it, and the agents that use it need no change, because they refer to it by name. Adding or removing a document works the same way. The text files in the project folder are the only copy of the documents, since the instance does not give them back; keep them in git.
 - watsonx Orchestrate also has a feature called chat with documents, which lets a user attach a file to one conversation. It is not a knowledge base: the file is not indexed for other conversations, and this guide does not use it.
 
 An agent uses a knowledge base when its definition names it. The agent's instructions decide when to search: in this chapter, for every question about a rule or a procedure, while the contacts and hours stay in the instructions.
@@ -50,6 +51,14 @@ An agent uses a knowledge base when its definition names it. The agent's instruc
 **The documents of this chapter**
 
 In a real project, the city's documents would exist and you would give them to Bob. The City of Utopia is fictional, so in this chapter you give Bob the rules and Bob writes the documents. Everything else, the knowledge base, the agent, the questions, works exactly as it would with real documents.
+
+**How it works, in a few lines**
+
+What you built in this chapter is what the industry calls retrieval-augmented generation, RAG for short: the agent retrieves passages from documents and the language model generates the answer from them. In watsonx Orchestrate it works like this.
+
+- At import, each document is split into passages, and each passage is converted into a list of numbers that captures its meaning, called an embedding. An embedding model does the conversion; the built-in knowledge base uses an IBM model named `slate-125m-english-rtrvr-v2` unless you choose another. The passages and their embeddings are stored in a vector database that comes with the platform, Milvus. This is the indexing that made Bob wait.
+- At question time, the resident's question is converted the same way, the database returns the passages whose embeddings are closest to it, and the language model writes the answer from those passages. The agent named the document in its answers because its instructions asked for it; the passages themselves carry the document they came from.
+- The built-in database is one option. If your organisation already keeps its documents in Milvus, Elasticsearch, OpenSearch or Astra DB, a knowledge base can point at that index instead of importing files, and the agent uses it the same way.
 
 ## 5.3 Ask mode: describe the knowledge
 
@@ -184,11 +193,18 @@ Bob may also have left files of its own, such as a scripts folder or a test repo
 
 Save your work: `Commit everything I changed with a short message saying what was built, and push.`
 
-## 5.8 Meet the agent again
+## 5.8 Ways to interact with watsonx Orchestrate agents
 
-Mode: Agent, same conversation.
+There are two ways to talk to an agent.
 
-Ask the agent the three questions from the Overview, through Bob, one per message:
+- **Using Bob.** You send the question to the agent through Bob: "Ask civic_info_agent: ...". Bob shows you the answer, and because Bob has seen it, you can ask Bob to correct the agent in your next message. This is how the chapters test every agent.
+- **From watsonx Orchestrate.** You open your instance in the browser and type the question yourself, in the chat that residents use for the live agent, or in the preview of the draft agent on the Manage agents page.
+
+Remember from chapter 4 that the agent exists in two copies, and keep in mind which one you are talking to. A question sent through Bob always reaches the draft, the copy you are developing. In watsonx Orchestrate you can reach both: the preview of the agent on the Manage agents page talks to the draft, and the chat on the landing page talks to the live copy. The two are not necessarily at the same level: right now the draft searches the documents and the live copy does not, and they stay different until you deploy in 5.9.
+
+In this section you try both. The documents in your knowledge base were written by your Bob, in its own words, but from the rules you gave in 5.3, so the answers to the questions below are in them whatever the wording. If an answer differs from what the rules say, open the document: if the rule is there, ask Bob to correct the agent as you did in chapter 4; if it is missing, ask Bob to add it to the document and import the knowledge base again.
+
+**Using Bob.** Ask the three questions from the Overview, one per message:
 
 ```
 Ask civic_info_agent: "Do I need a permit for a garden shed of 8 square metres?"
@@ -210,49 +226,26 @@ Then ask as residents do:
 - A question with a day in it: "Can the builders work on Sunday morning?" Never on Sundays.
 - A question about a rule that the documents do not cover: "Can I keep chickens in my garden?" The agent says that it does not have that information.
 
-Open your watsonx Orchestrate instance in the browser and ask the shed question in the chat. The answer names the document there too; this is where residents will read it.
+**From watsonx Orchestrate.** The agent that searches the documents is still the draft; the live agent is the chapter 4 version until section 5.9. So do not use the chat on the landing page yet: it answers with contacts and hours and no documents. Open your instance in the browser, go to Manage agents, select Utopia city information, and use the preview panel, which talks to the draft. Type the shed question; the same answer comes back, with its document named.
 
-## 5.9 Correct a wrong answer
-
-Mode: Agent, same conversation.
-
-Read the party answer and the chickens answer again, to the end. On the run behind this chapter, both were right about the rule and both added something that is in no document. The party answer sent the resident to Roads and Infrastructure "for further assistance", a department that has nothing to do with noise; the ordinance gives an online address and no department. The chickens answer said "I do not have that information" and then named a City of Utopia Animal Services Department, which does not exist.
-
-This is the habit you met in chapter 4: when the facts give no department, the agent supplies one. The documents made it visible again, because the noise ordinance names no department at all. The correction is the same as in chapter 4, a change to the instructions, and this time it also gives the agent somewhere to send residents when none of the three departments applies:
-
-```
-civic_info_agent adds departments that are not in its facts: it sent a noise
-question to Roads and Infrastructure, and it named an Animal Services
-Department that does not exist. Add a general contact to its facts: City Hall
-information desk, info@utopia.example, 555 0100, Monday to Friday 09:00 to
-17:00. When a question is outside the three departments, or a document gives
-no department, the agent must give the City Hall contact and must not name any
-other department. Import the agent again and ask the party question and the
-chickens question again.
-```
-
-Bob changes the instructions, imports the agent again, and asks both questions. The party answer now ends with the online address of the ordinance or the City Hall contact, and the chickens answer with "I do not have that information" and City Hall.
-
-A second kind of wrong answer can appear with a knowledge base: the agent finds nothing although the rule is in a document. The usual cause is the document, where the rule is phrased in a way that does not match how residents ask. Tell Bob what the resident asked and what the document says, and ask it to rewrite that passage and import the knowledge base again. The knowledge base is re-indexed; the agent does not change.
-
-## 5.10 Make the change live
+## 5.9 Make the change live
 
 Mode: Agent, same conversation.
 
-The corrected agent is a draft. The live agent from chapter 4 still answers from its twenty lines of facts. Deploy again:
+The agent that searches the documents is a draft. The live agent from chapter 4 still answers from its twenty lines of facts. Deploy again:
 
 ```
 Deploy civic_info_agent from draft to live.
 ```
 
-One difference from chapter 4: the knowledge base is already shared by draft and live, because it belongs to the instance. What the deployment changes is the agent, which now knows to search it. On the Developer Edition, skip this step.
+Bob reports that the agent is live and tells you where residents can find it: in the watsonx Orchestrate chat, with the environment switched to Live in the top-right corner, under its display name, Utopia city information. Go there and ask the shed question. The answer that was only in the draft an hour ago is now the one every resident gets. On the Developer Edition, skip this step.
 
-## 5.11 Summary
+## 5.10 Summary
 
 The agent can now answer from the city's regulations: a question about a shed, a mirror or a party gets the rule, not a phone number, with the document it came from. Bob wrote the documents, defined the knowledge base, waited for it to be ready, and changed the agent; you described the rules and approved the design.
 
-- A knowledge base is a set of documents that the platform indexes and an agent searches. It holds files, not instructions.
-- A knowledge base is not ready at once; the agent must wait until it is.
+- A knowledge base is a set of documents that the platform indexes and an agent searches. It holds files, not instructions. An agent that answers this way is what the industry calls retrieval-augmented generation, RAG: when you hear that an agent "uses RAG", it has a knowledge base.
+- After the import, the platform needs a few minutes to index the documents. The knowledge base can be attached to an agent only when its status is ready.
 - The agent's instructions decide when to search and what to say when the documents have no answer.
 - A knowledge base belongs to the instance. A change to its documents reaches the draft and the live agent at once.
 
