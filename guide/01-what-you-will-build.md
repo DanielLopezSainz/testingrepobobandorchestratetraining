@@ -6,15 +6,15 @@ Level: beginner. Time: about 5 minutes of reading. Prerequisites: none.
 
 Creating an agent in watsonx Orchestrate usually means writing definition files, Python functions and commands by hand. With IBM Bob, you describe what the agent must do. Bob writes the files, sends them to your instance, and tests the result.
 
-The system is CivicPulse, the citizen services platform of the fictional City of Utopia. Residents ask it which department handles their question, check the status of a permit, report a broken street light, and apply for a building permit. You start with one agent that answers from a short list of facts. Chapter by chapter, you give it the city's regulations to search, tools to look up data, a connection to the city's service desk, a team of specialised agents and a permit workflow. Chapter 11 puts it on the city's website.
+The system is CivicPulse, the citizen services platform of the fictional City of Utopia. Residents ask it which department handles their question, check the status of a permit, report a broken street light, and apply for a building permit. You start with one Orchestrate Agent that answers from a short list of facts. Chapter by chapter, you give it the city's regulations to search, tools to look up data, a connection to the city's service desk, a team of specialised agents and a permit workflow. Chapter 11 puts it on the city's website.
 
 At the end of the guide, you have built:
 
 - A front desk agent and three department agents that work together.
-- A knowledge base of city guides and regulations that the agents search.
-- Tools that read the status of requests and permits, and report new issues to an external system.
-- A permit application that follows fixed steps, with an approval by a city clerk.
-- A chat window that residents use on a web page.
+- An Orchestrate Knowledge Base of city guides and regulations that the agents search.
+- Orchestrate Tools that read the status of requests and permits, and report new issues to an external system, through an Orchestrate Connection.
+- An Orchestrate Flow for the permit application, with fixed steps and an approval by a city clerk.
+- An Orchestrate Channel: a chat window that residents use on a web page.
 
 If you already know watsonx Orchestrate and Bob, go to section 1.3 for the scenario and section 1.4 for the list of chapters.
 
@@ -24,32 +24,32 @@ The guide uses two IBM products, each with a different job.
 
 | Product | What it is | Its job in this guide |
 |---|---|---|
-| IBM watsonx Orchestrate | A platform that runs AI agents. An agent answers questions and performs tasks for its users, using instructions, documents, and connections to other systems | The agents that you create run here. Your copy of the platform is called an instance: a SaaS tenant, or the Developer Edition on your own machine |
+| IBM watsonx Orchestrate | A platform that runs AI agents. An Orchestrate Agent answers questions and performs tasks for its users, using instructions, documents, and connections to other systems | The agents that you create run here. Your copy of the platform is called an instance: a SaaS tenant, or the Developer Edition on your own machine |
 | IBM Bob | An AI coding assistant that works inside a development environment. You describe what you want in a chat; Bob writes the files, runs the operations, and reports the result | You create the agents here. You do not write code or configuration files by hand |
 
 Chapter 2 installs the watsonx Orchestrate ADK extension for Bob, which connects the two products: with it, Bob can list what exists on your instance, send new agents to it, and test them.
 
-## 1.2 What an agent is made of
+## 1.2 What an Orchestrate Agent is made of
 
-An agent in watsonx Orchestrate is built from a small set of components.
+An Orchestrate Agent is built from a small set of components. Each component is an Orchestrate asset with its own type, named with a capital in this guide.
 
 | Component | What it is |
 |---|---|
 | Instructions | The text that defines the agent: its role, the facts it knows, how it answers, and what it must not do |
 | Model | The language model that the agent runs on. The guide uses the default model of the instance. Each agent can use a different model |
-| Knowledge base | A set of documents that the agent searches when a question needs more information than its instructions hold |
-| Tools | Functions that the agent calls to look up data or to perform an action |
-| Connections | The addresses and credentials of the external systems that tools use |
-| MCP toolkits | Groups of tools provided by an external server and attached to the agent as a set |
-| Collaborator agents | Other agents that an agent delegates to, so that each agent has a clear purpose |
-| Flows | Fixed sequences of steps that run the same way every time |
-| Channels | The interfaces through which users reach an agent, such as a chat window on a web page |
+| Orchestrate Knowledge Base | A set of documents that the agent searches when a question needs more information than its instructions hold |
+| Orchestrate Tools | Functions that the agent calls to look up data or to perform an action |
+| Orchestrate Connections | The addresses and credentials of the external systems that tools use |
+| Orchestrate Toolkits | Groups of tools provided by an external server and attached to the agent as a set |
+| Collaborator Agents | Other Orchestrate Agents that an agent delegates to, so that each agent has a clear purpose |
+| Orchestrate Flows | Fixed sequences of steps that run the same way every time |
+| Orchestrate Channels | The interfaces through which users reach an agent, such as a chat window on a web page |
 
 Everything that you create is stored first in the Draft environment of the instance, where only you can use it; deployment in Live makes it available to its users.
 
 ## 1.3 The scenario
 
-The guide builds one system from start to finish: CivicPulse, the citizen services platform of the City of Utopia. The scenario gives every component of an agent a use: regulations to search, a permit status to look up, a service desk to report to, departments to route between.
+The guide builds one system from start to finish: CivicPulse, the citizen services platform of the City of Utopia. The scenario gives every component of an Orchestrate Agent a use: regulations to search, a permit status to look up, a service desk to report to, departments to route between.
 
 The city, its departments, its residents and all its data are fictional. Three departments are used throughout the guide:
 
@@ -65,14 +65,14 @@ The city, its departments, its residents and all its data are fictional. Three d
 |---|---|---|---|
 | 2 | Connect Bob to your watsonx Orchestrate instance | The instance and its environments | The extension, the views, the approvals |
 | 3 | Learn the working method | None | The Ask, Plan and Agent modes; prompts; git |
-| 4 | Create an agent that tells residents which department to contact, and deploy it in Live | Instructions and model; the Draft and Live environments | The three modes in sequence |
-| 5 | Give the agent the city's guides and regulations | Knowledge base | Bob writes the documents |
-| 6 | Let the agent look up the status of a request or a permit | Tools | Bob writes the tools; reading the agent's reasoning |
-| 7 | Let the agent report a new issue to the city service desk | Connections | Credentials kept out of the chat |
-| 8 | Add an address lookup provided by an external server | MCP toolkit | Bob's skill for building an MCP server |
-| 9 | Split the work between a front desk agent and one agent per department | Collaborator agents | Plan mode for a design with several agents |
-| 10 | Add a permit application that follows fixed steps | Flow | Agent mode on a build with several steps |
-| 11 | Make CivicPulse available to residents on the city's website | Re-deployment after changes, and the web chat channel | The deployment approval |
+| 4 | Create an Orchestrate Agent that tells residents which department to contact, and deploy it in Live | Instructions and model; the Draft and Live environments | The three modes in sequence |
+| 5 | Give the agent the city's guides and regulations | Orchestrate Knowledge Base | Bob writes the documents |
+| 6 | Let the agent look up the status of a request or a permit | Orchestrate Tools | Bob writes the tools; reading the agent's reasoning |
+| 7 | Let the agent report a new issue to the city service desk | Orchestrate Connections | Credentials kept out of the chat |
+| 8 | Add an address lookup provided by an external server | Orchestrate Toolkit | Bob's skill for building an MCP server |
+| 9 | Split the work between a front desk agent and one agent per department | Collaborator Agents | Plan mode for a design with several agents |
+| 10 | Add a permit application that follows fixed steps | Orchestrate Flow | Agent mode on a build with several steps |
+| 11 | Make CivicPulse available to residents on the city's website | Re-deployment after changes, and the Orchestrate Channel for web chat | The deployment approval |
 | 12 | Add a new department, Parks and Events, without step-by-step help | All of the above | The Orchestrate skills |
 
 From chapter 4 onwards, each chapter opens with an overview that says what is built and whether you can skip it, states its prerequisites, lists its steps, and ends with questions to check the result. The files that each chapter produces are in the `walkthroughs` folder of the repository, so that you can start at any chapter.
