@@ -6,7 +6,7 @@ Level: beginner. Time: about 5 minutes of reading. Prerequisites: none.
 
 Creating an Agent in watsonx Orchestrate usually means writing definition files, Python functions and commands by hand. With IBM Bob, you describe what the Agent must do. Bob writes the files, sends them to your instance, and tests the result.
 
-The system is CivicPulse, the citizen services platform of the fictional City of Utopia. Residents ask it which department handles their question, check the status of a permit, report a broken street light, and apply for a building permit. You start with one Orchestrate Agent that answers from a short list of facts. Chapter by chapter, you give it the city's regulations to search, Tools to look up data, a Connection to the city's service desk, a team of specialised Agents and a permit workflow. Chapter 11 puts it on the city's website.
+The system is CivicPulse, the citizen services platform of the fictional City of Utopia. Residents ask it which department handles their question, check the status of a permit, report a broken street light, and apply for a building permit. You start with one Orchestrate Agent that answers from a short list of facts. Chapter by chapter, you give it the city's regulations to search, Tools to look up data, a Connection to the city's 311 Call Center, a team of specialised Agents and a permit workflow. Chapter 11 puts it on the city's website.
 
 At the end of the guide, you have built:
 
@@ -49,7 +49,7 @@ Everything that you create is stored first in the Draft environment of the insta
 
 ## 1.3 The scenario
 
-The guide builds one system from start to finish: CivicPulse, the citizen services platform of the City of Utopia. The scenario gives every component of an Orchestrate Agent a use: regulations to search, a permit status to look up, a service desk to report to, departments to route between.
+The guide builds one system from start to finish: CivicPulse, the citizen services platform of the City of Utopia. The scenario gives every component of an Orchestrate Agent a use: regulations to search, a permit status to look up, a 311 Call Center to report to, departments to route between.
 
 The city, its departments, its residents and all its data are fictional. Three departments are used throughout the guide:
 
@@ -68,7 +68,7 @@ The city, its departments, its residents and all its data are fictional. Three d
 | 4 | Create an Orchestrate Agent that tells residents which department to contact, and deploy it in Live | Instructions and model; the Draft and Live environments | The three modes in sequence |
 | 5 | Give the Agent the city's guides and regulations | Orchestrate Knowledge Base | Bob writes the documents |
 | 6 | Let the Agent look up the status of a request or a permit | Orchestrate Tools | Bob writes the Tools; reading the Agent's reasoning |
-| 7 | Let the Agent report a new issue to the city service desk | Orchestrate Connections | Credentials kept out of the chat |
+| 7 | Let the Agent report a new issue to the city's 311 Call Center | Orchestrate Connections | Credentials kept out of the chat |
 | 8 | Add an address lookup provided by an external server | Orchestrate Toolkit | Bob's skill for building an MCP server |
 | 9 | Split the work between a front desk Agent and one Agent per department | Collaborator Agents | Plan mode for a design with several Agents |
 | 10 | Add a permit application that follows fixed steps | Orchestrate Flow | Agent mode on a build with several steps |
