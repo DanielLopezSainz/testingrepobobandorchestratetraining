@@ -6,6 +6,20 @@ cd "$SCRIPT_DIR/.."
 
 source venv/bin/activate
 
+# Load environment variables from .env file
+if [ -f .env ]; then
+  export $(grep -v '^#' .env | xargs)
+fi
+
+echo "==> Creating connection utopia_311..."
+orchestrate connections add --app-id utopia_311
+
+echo "==> Configuring connection utopia_311..."
+orchestrate connections configure --app-id utopia_311 --kind api_key --type team --environment draft
+
+echo "==> Setting credentials for utopia_311 from environment..."
+orchestrate connections set-credentials --app-id utopia_311 --environment draft --api-key "$UTOPIA_311_API_KEY"
+
 echo "==> Importing knowledge base city_regulations..."
 (cd knowledge-bases && orchestrate knowledge-bases import -f city_regulations.yaml)
 
@@ -32,6 +46,9 @@ orchestrate tools import -k python --file tools/get_request_status.py --package-
 
 echo "==> Importing tool get_collection_days..."
 orchestrate tools import -k python --file tools/get_collection_days.py --package-root tools/
+
+echo "==> Importing tool report_issue..."
+orchestrate tools import -k python --file tools/report_issue.py --package-root tools/ --app-id utopia_311
 
 echo "==> Importing civic_info_agent..."
 orchestrate agents import -f agents/civic_info_agent.yaml
